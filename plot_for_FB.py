@@ -5,7 +5,7 @@ import dp_plot_tools as dplt
 RUNDIR = '/home/przybylski/scratch/3D_TEST_HIGH/'
 
 snap = rmu.MURaM_snap(RUNDIR,boxtop=12.0e8)
-snap.load('190000',tooload=['rho','tem','vz','bz','Qtot','vx','vy','bx','by','tau','eps','pre']) ##,'ne','QxH','QxCa','QxMg','QxCor'])
+snap.load('190000',tooload=['rho','tem','vz','bz','Qtot','vx','vy','bx','by','tau','eps','pre'])
 
 scale = (snap.tau*snap.tau/(snap.tau*snap.tau+1.0e-16))
 
