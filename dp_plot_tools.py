@@ -445,16 +445,20 @@ def fmt(x, pos):
   a, b = '{:.2e}'.format(x).split('e')
   b = int(b)
 
-  if (abs(x) >= 1000.0):
+  if (abs(x) == 0.0):
+    outfmt = '{:03.2f}'.format(x)
+  elif((abs(x) >= 1000.0) or (abs(x) <= 1.0e-3)):
     outfmt = r'${}\times10^{{{}}}$'.format(a, b)
   elif (abs(x) >= 100.0):
     outfmt = '{:04.1f}'.format(x)
   elif (abs(x) >= 10.0):
     outfmt = '{:03.1f}'.format(x)
+  elif (abs(x) < 1.0e-2):
+    outfmt = '{:04.3f}'.format(x)
   else:
     outfmt = '{:03.2f}'.format(x)
   return outfmt
-    
+
 def fig_open(figsize=None,numx=1,numy=1,hr = None, wr = None):
   fig = plt.figure(figsize=figsize)
   if not hr:
