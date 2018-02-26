@@ -1,6 +1,6 @@
 def read_Iout(dir,iter):
 
-  tmp = np.fromfile(dir+'I_out.'+iter,dtype=np.float32)
+  tmp = np.fromfile(dir+'I_out.'+inttostring(iter,ts_size=6),dtype=np.float32)
 
   size = tmp[1:3].astype(int)
   time = tmp[3]
@@ -9,45 +9,49 @@ def read_Iout(dir,iter):
 
 def read_tauslice(dir,depth,iter):
 
-  tmp = np.fromfile(dir+'tau_slice_'+depth+'.'+iter,dtype=np.float32)
+  tmp = np.fromfile(dir+'tau_slice_'+depth+'.'+inttostring(iter,ts_size=6),dtype=np.float32)
 
-  size = tmp[0:3].astype(int)
+  nslices = tmp[0].astype(int)
+  size = tmp[1:3].astype(int)
   time = tmp[3]
 
-  return tmp[4:].reshape(size),size,time
+  return tmp[4:].reshape([nslices,size[1],size[0]]).swapaxes(1,2),nslices,size,time
 
 def read_xyslice(dir,gridpt,iter):
 
-  tmp = np.fromfile(dir+'xy_slice_'+gridpt+'.'+iter,dtype=np.float32)
+  tmp = np.fromfile(dir+'xy_slice_'+gridpt+'.'+inttostring(iter,ts_size=6),dtype=np.float32)
 
-  size = tmp[0:3].astype(int)
+  nslices = tmp[0].astype(int)
+  size = tmp[1:3].astype(int)
   time = tmp[3]
 
-  return tmp[4:].reshape(np.append(nslices,size)),size,time
+  return tmp[4:].reshape([nslices,size[1],size[0]]).swapaxes(1,2),nslices,size,time
 
 def read_yzslice(dir,gridpt,iter):
 
-  tmp = np.fromfile(dir+'yz_slice_'+gridpt+'.'+iter,dtype=np.float32)
+  tmp = np.fromfile(dir+'yz_slice_'+gridpt+'.'+inttostring(iter,ts_size=6),dtype=np.float32)
 
-  size = tmp[0:3].astype(int)
+  nslices = tmp[0].astype(int)
+  size = tmp[1:3].astype(int)
   time = tmp[3]
 
-  return tmp[4:].reshape(np.append(nslices,size)),size,time
+  return tmp[4:].reshape([nslices,size[1],size[0]]).swapaxes(1,2),nslices,size,time
 
 def read_xzslice(dir,gridpt,iter):
 
-  tmp = np.fromfile(dir+'xz_slice_'+gridpt+'.'+iter,dtype=np.float32)
+  tmp = np.fromfile(dir+'xz_slice_'+gridpt+'.'+ inttostring(iter,ts_size=6),dtype=np.float32)
 
-  size = tmp[0:3].astype(int)
+  nslices = tmp[0].astype(int)
+  size = tmp[1:3].astype(int)
   time = tmp[3]
 
-  return tmp[4:].reshape(np.append(nslices,size)),size,time
+  return tmp[4:].reshape([nslices,size[1],size[0]]).swapaxes(1,2),nslices,size,time
 
 def inttostring(ii,ts_size=6):
 
   str_num = str(ii)
 
-  for bb in range(len(str_num),4,1):
+  for bb in range(len(str_num),ts_size,1):
     str_num = '0'+str_num
   
   return str_num
@@ -73,6 +77,8 @@ def MURaM_output(arr,dir,output,iter = '000000',prim=True, precision = 'single')
       filename = 'result_0.'
   if output is 'eps':
       filename = 'result_4.'
+  if output is 'sflx':
+      filename = 'result_8.'
 
   if prim: filename=filename.replace('_','_prim_')
 
@@ -290,12 +296,18 @@ class MURaM_snap:
       str = '3D/QxMg.'
       self.QxMg = np.zeros([self.nx,self.ny,self.nz],dtype = np.float32)
       self.QxMg[:,:,:] = np.fromfile(self.dir + str+iter,dtype = np.float32).reshape([self.ny,self.nx,self.nz]).swapaxes(0,1)
-
+     
     def loadQxCor(iter,primative):
       
       str = '3D/QxCor.'
       self.QxCor = np.zeros([self.nx,self.ny,self.nz],dtype = np.float32)
       self.QxCor[:,:,:] = np.fromfile(self.dir + str+iter,dtype = np.float32).reshape([self.ny,self.nx,self.nz]).swapaxes(0,1)
+
+    def loadsflx(iter,primative):
+      
+      str = '3D/result_8.'
+      self.sflx = np.zeros([self.nx,self.ny,self.nz],dtype = np.float32)
+      self.sflx[:,:,:] = np.fromfile(self.dir + str+iter,dtype = np.float32).reshape([self.ny,self.nx,self.nz]).swapaxes(0,1)
 
     options = {'rho' : loadrho,
                'bx' : loadbx,
@@ -314,6 +326,7 @@ class MURaM_snap:
                'QxMg' : loadQxMg,
                'QxCor' : loadQxCor,
                'ne' : loadne,
+               'sflx' : loadsflx,
                }
 
     self.iter = np.int(iter)
